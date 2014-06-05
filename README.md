@@ -1,4 +1,3 @@
-todomvc-tutorial
+Développer TodoMVC à la mode KSF
 ================
 
-Tutoriel expliquant la démarche pour développer TodoMVC à la mode KSF
