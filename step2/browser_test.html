@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Browser test runner</title>
+		<script src="./node_modules/intern/node_modules/dojo/dojo.js"></script>
+		<script>
+(function () {
+	var root = location.pathname.replace(/[^\/]+$/, '');
+	require({
+		baseUrl: root + 'bower_components/',
+		packages: [
+			{ name: 'intern', location: root + 'node_modules/intern' },
+			{ name: 'chai', location: root + 'node_modules/intern/node_modules/chai', main: 'chai' },
+			{ name: 'app', location: root + 'src' },
+		],
+		map: { 'intern': { 'dojo': 'intern/node_modules/dojo' } }
+	}, [ 'intern/lib/realClient', 'intern/lib/args', 'app/require-config' ], function(client) {
+		client.run({
+			suites: [location.search.slice(1)]
+		}, {});
+	});
+})();
+		</script>
+	</head>
+</html>
