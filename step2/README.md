@@ -1,4 +1,6 @@
-# Etape 2 : création du modèle et affichage de tâches
+# Etape 2 : création du modèle de données et affichage de tâches
+
+Nous définissons maintenant la structure des données, et un premier affichage de quelques données de test.
 
 ## src/Model.js
 
@@ -18,5 +20,14 @@ Pour tester ce modèle, il faut installer intern :
 puis lancer les tests unitaires :
 http://localhost:8080/browser_test.html?app/tests/Model
 
+## src/Todo.js
+
+Nous définissons ici le composant représentant une tâche. Il ne permet pas, pour le moment, de modifier le libellé de cette tâche.
+Nous ne nous intéressons pas encore à son apparence non plus. 
+
 ## src/App.js
 
+Nous ajoutons un sous-composant pour représenter la liste de tâches, qui utilise le composant "Todo" pour représenter chaque élément.
+Nous devons créer un conteneur comme composant racine pour regrouper le titre et la liste. Nous utilisons un conteneur en flux `Flow`.
+
+Nous créons quelques données de test pour tester l'affichage.
