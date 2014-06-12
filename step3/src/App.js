@@ -51,12 +51,6 @@ define([
 		}
 	});
 
-	var TodoList = compose(ItemList, {
-		_itemFactory: function(todo) {
-			return new Todo(todo);
-		}
-	});
-
 	var sortStore = function(store) {
 		return store.sort(function(a, b) {
 			return a.creation - b.creation;
@@ -120,7 +114,11 @@ define([
 			textShadow: '-1px -1px rgba(0, 0, 0, 0.2)'
 		}));
 
-		var list = new TodoList();
+		var list = compose.create(ItemList, {
+			_itemFactory: function(todo) {
+				return new Todo(todo);
+			}
+		});
 
 		var todoInput = new ShortTextInput({
 			placeholder: "What needs to be done?"
@@ -161,13 +159,13 @@ define([
 			list.content(sortStore(completedTodos));
 		});
 
-		// check-all accessor
-		var checkAll = new CheckAllAccessor(todoStore);
+		// check-all
+		var checkAll = new Checkbox(new CheckAllAccessor(todoStore));
 
 		// Layout
 		this._root.content([
 			title,
-			new Checkbox(checkAll),
+			checkAll,
 			todoInput,
 			list,
 			activeCounter,

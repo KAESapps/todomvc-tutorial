@@ -17,12 +17,6 @@ define([
 	Model,
 	JSS
 ){
-	var TodoList = compose(ItemList, {
-		_itemFactory: function(todo) {
-			return new Todo(todo);
-		}
-	});
-
 	return compose(_Composite, {
 		_rootFactory: function() {
 			return new Flow();
@@ -39,7 +33,11 @@ define([
 			textShadow: '-1px -1px rgba(0, 0, 0, 0.2)'
 		}));
 
-		var list = new TodoList();
+		var list = compose.create(ItemList, {
+			_itemFactory: function(todo) {
+				return new Todo(todo);
+			}
+		});
 		
 		this._root.content([
 			title,
