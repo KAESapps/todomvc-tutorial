@@ -8,6 +8,8 @@ define([
 	'ksf-ui/widget/editable/Checkbox',
 	'ksf/dom/style/JSS',
 	'ksf/dom/style/_Stylable',
+	'ksf/model/Value',
+	"dojo/promise/all",
 ], function(
 	compose,
 	_Composite,
@@ -17,7 +19,9 @@ define([
 	ShortText,
 	Checkbox,
 	JSS,
-	_Stylable
+	_Stylable,
+	Prop,
+	all
 ){
 	var EditableLabel = compose(_Composite, _Stylable, {
 		_rootFactory: function() {
@@ -27,7 +31,7 @@ define([
 		this._rValue = rValue;
 		this._label = new Label(rValue);
 		this._editor = new ShortText();
-		
+
 		var self = this;
 		this.domNode.ondblclick = function() {
 			self._edit();
@@ -69,19 +73,23 @@ define([
 
 	return compose(_Composite, {
 		_rootFactory: function() {
-			return new Flow();			
+			return new Flow();
 		}
 	}, function(todo) {
 		var self = this;
-		var label = this._label = new EditableLabel(todo.prop('label'));
+		var label = this._label = new EditableLabel(new Prop(todo, 'label'));
 		label.style(new JSS({
 			display: 'inline-block',
 		}));
-		
-		var checkbox = new Checkbox(todo.prop('done'));
+
+		var checkbox = new Checkbox(new Prop(todo, 'done'));
 		var deleteBtn = new Button("X");
 		deleteBtn.onAction(function() {
-			todo.delete();
+			all([
+				todo.change(['label', null]),
+				todo.change(['done', null]),
+				todo.change(['creation', null]),
+			]);
 		});
 
 		this._root.content([

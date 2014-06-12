@@ -1,8 +1,10 @@
 {
   "name": "step1",
   "dependencies": {
+    "ksf": "KAESapps/ksf#syv_experiment",
     "ksf-ui": "KAESapps/ksf-ui#master",
     "todomvc-common": "~0.1.9",
-    "requirejs": "~2.1.14"
+    "requirejs": "~2.1.14",
+    "pouchdb": "~2.2.3"
   }
 }
