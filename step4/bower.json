@@ -1,6 +1,7 @@
 {
-  "name": "step1",
+  "name": "step4",
   "dependencies": {
+    "ksf": "KAESapps/ksf#master",
     "ksf-ui": "KAESapps/ksf-ui#master",
     "todomvc-common": "~0.1.9",
     "requirejs": "~2.1.14"

@@ -1,0 +1,19 @@
+{
+ "name": "ksf-todomvc-tutorial-step4",
+ "version": "0.0.0",
+ "description": "",
+ "dependencies": {
+   "ksf": "KAESapps/ksf#master",
+   "ksf-ui": "KAESapps/ksf-ui#master"
+ },
+ "scripts": {
+   "build": "browserify src/boot.js -o build/app.js"
+ },
+ "devDependencies": {
+   "browserify": "latest",
+   "deamdify": "~0.1.1"
+ },
+ "browserify": {
+   "transform": ["deamdify"]
+ }
+}

@@ -1,16 +1,14 @@
 define([
 	'ksf-ui/utils/Init',
 	'ksf/dom/style/JSS',
-	'./App',
-	'require'
+	'./App'
 ], function(
 	Init,
 	JSS,
-	App,
-	require
+	App
 ){
 	new JSS({
-		background: "#eaeaea url('" + require.toUrl('todomvc-common/bg.png') + "')"
+		background: "#eaeaea url('./bg.png')"
 	}).apply(document.body);
 	
 	new Init(new App().bounds({}));

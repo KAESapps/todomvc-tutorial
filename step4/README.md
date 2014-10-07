@@ -5,3 +5,12 @@ Maintenant que l'application est fonctionnellement complète, nous nous occupons
 # src/App.js
 
 Pour y voir un peu plus clair, nous exportons les composants déclarés en ligne dans des fichiers séparés.
+
+# Browserify
+
+Cette étape est compatible browserify :
+
+    npm install
+    npm run build
+
+Lancer ensuite le fichier index.html dans le dossier build/.
