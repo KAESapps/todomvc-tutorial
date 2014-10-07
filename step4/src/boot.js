@@ -13,5 +13,5 @@ define([
 		background: "#eaeaea url('" + require.toUrl('todomvc-common/bg.png') + "')"
 	}).apply(document.body);
 	
-	new Init(new App());
+	new Init(new App().bounds({}));
 });

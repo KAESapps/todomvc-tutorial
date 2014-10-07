@@ -1,33 +1,22 @@
 define([
-	'compose',
+	'ksf/utils/compose',
 	'ksf/dom/composite/_Composite',
-	'ksf-ui/layout/Flow',
+	'ksf-ui/layout/HFlex',
 	'ksf-ui/widget/Label',
 	'ksf-ui/widget/editable/Checkbox',
 	'ksf/dom/style/JSS',
 ], function(
 	compose,
 	_Composite,
-	Flow,
+	HFlex,
 	Label,
 	Checkbox,
 	JSS
 ){
-	return compose(_Composite, {
-		_rootFactory: function() {
-			return new Flow();			
-		}
-	}, function(todo) {
-		var label = new Label(todo.prop('label'));
-		label.style(new JSS({
-			display: 'inline-block',
-		}));
-
-		var checkbox = new Checkbox(todo.prop('done'));
-
-		this._root.content([
-			checkbox,
-			label,
-		]);
+	return compose(_Composite, function(todo) {
+		this._setRoot(new HFlex().content([
+			new Checkbox(todo.prop('done')),
+			new Label(todo.prop('label')),
+		]));
 	});
 });

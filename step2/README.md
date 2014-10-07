@@ -28,6 +28,6 @@ Nous ne nous intéressons pas encore à son apparence non plus.
 ## src/App.js
 
 Nous ajoutons un sous-composant pour représenter la liste de tâches, qui utilise le composant "Todo" pour représenter chaque élément.
-Nous devons créer un conteneur comme composant racine pour regrouper le titre et la liste. Nous utilisons un conteneur en flux `Flow`.
+Nous devons créer un conteneur comme composant racine pour regrouper le titre et la liste. Nous utilisons un conteneur vertical `VFlex`.
 
 Nous créons quelques données de test pour tester l'affichage.

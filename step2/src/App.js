@@ -1,8 +1,8 @@
 define([
-	'compose',
+	'ksf/utils/compose',
 	'ksf/dom/composite/_Composite',
 	'ksf-ui/widget/base/Label',
-	'ksf-ui/layout/Flow',
+	'ksf-ui/layout/VFlex',
 	'ksf-ui/list/ItemList',
 	'./Todo',
 	'./Model',
@@ -11,19 +11,14 @@ define([
 	compose,
 	_Composite,
 	Label,
-	Flow,
+	VFlex,
 	ItemList,
 	Todo,
 	Model,
 	JSS
 ){
-	return compose(_Composite, {
-		_rootFactory: function() {
-			return new Flow();
-		}
-	}, function() {
-		var title = new Label("todos");
-		title.style(new JSS({
+	var style = {
+		title: new JSS({
 			display: 'block',
 			fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
 			fontSize: '70px',
@@ -31,18 +26,17 @@ define([
 			textAlign: 'center',
 			color: 'rgba(255, 255, 255, 0.3)',
 			textShadow: '-1px -1px rgba(0, 0, 0, 0.2)'
-		}));
-
-		var list = compose.create(ItemList, {
-			_itemFactory: function(todo) {
-				return new Todo(todo);
-			}
-		});
-		
-		this._root.content([
-			title,
-			list
-		]);
+		})
+	};
+	return compose(_Composite, function() {
+		this._setRoot(new VFlex().content([
+			new Label("todos").style(style.title),
+			this._own(compose.create(ItemList, {
+				_itemFactory: function(todo) {
+					return new Todo(todo);
+				}
+			}), 'list')
+		]));
 
 		var todoStore = new Model();
 		todoStore.add({
@@ -57,7 +51,7 @@ define([
 		});
 
 		// list todos sorted by creation timestamp, oldest first
-		list.content(todoStore.sort(function(a, b) {
+		this._owned.list.content(todoStore.sort(function(a, b) {
 			return a.creation - b.creation;
 		}));
 	});

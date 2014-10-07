@@ -1,12 +1,16 @@
 define([
-	'compose',
+	'ksf/utils/compose',
+	'ksf/dom/composite/_Composite',
+	'ksf/dom/composite/_RootStylable',
 	'ksf-ui/widget/base/Label',
 ], function(
 	compose,
+	_Composite,
+	_RootStylable,
 	Label
 ){
-	return compose(Label.prototype, function(countAccessor) {
-		Label.call(this);
+	return compose(_Composite, _RootStylable, function(countAccessor) {
+		this._setRoot(new Label());
 		this._displayCount(countAccessor.value());
 		var self = this;
 		countAccessor.onChange(function(value) {
@@ -14,7 +18,7 @@ define([
 		});
 	}, {
 		_displayCount: function(count) {
-			this.value(count + " item" + (count !== 1 ? "s" : "") + " left");
+			this._root.value(count + " item" + (count !== 1 ? "s" : "") + " left");
 		}
 	});
 });

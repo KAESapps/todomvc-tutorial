@@ -1,12 +1,13 @@
 define([
-	'compose',
+	'ksf/utils/compose',
 	'ksf/dom/composite/_Composite',
 	'ksf-ui/widget/base/Label',
 	'ksf-ui/widget/Label',
 	'ksf-ui/widget/base/Button',
 	'ksf-ui/widget/input/ShortText',
 	'ksf-ui/widget/editable/Checkbox',
-	'ksf-ui/layout/Flow',
+	'ksf-ui/layout/VFlex',
+	'ksf-ui/layout/HFlex',
 	'ksf-ui/list/ItemList',
 	'./Todo',
 	'./Model',
@@ -19,14 +20,15 @@ define([
 	Button,
 	ShortTextInput,
 	Checkbox,
-	Flow,
+	VFlex,
+	HFlex,
 	ItemList,
 	Todo,
 	Model,
 	JSS
 ){
-	var ActiveTodoCounter = compose(Label.prototype, function(countAccessor) {
-		Label.call(this);
+	var ActiveTodoCounter = compose(_Composite, function(countAccessor) {
+		this._setRoot(new Label());
 		this._displayCount(countAccessor.value());
 		var self = this;
 		countAccessor.onChange(function(value) {
@@ -34,12 +36,12 @@ define([
 		});
 	}, {
 		_displayCount: function(count) {
-			this.value(count + " item" + (count !== 1 ? "s" : "") + " left");
+			this._root.value(count + " item" + (count !== 1 ? "s" : "") + " left");
 		}
 	});
 
-	var ClearCompletedButton = compose(Button.prototype, function(countAccessor) {
-		Button.call(this);
+	var ClearCompletedButton = compose(_Composite, function(countAccessor) {
+		this._setRoot(new Button(this));
 		this._displayCount(countAccessor.value());
 		var self = this;
 		countAccessor.onChange(function(value) {
@@ -47,7 +49,10 @@ define([
 		});
 	}, {
 		_displayCount: function(count) {
-			this.value("Clear completed (" + count + ")");
+			this._root.value("Clear completed (" + count + ")");
+		},
+		onAction: function(cb) {
+			return this._root.onAction(cb);
 		}
 	});
 
@@ -85,11 +90,19 @@ define([
 		}
 	});
 
-	return compose(_Composite, {
-		_rootFactory: function() {
-			return new Flow();
-		}
-	}, function() {
+	var style = {
+		title: new JSS({
+			display: 'block',
+			fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+			fontSize: '70px',
+			fontWeight: 'bold',
+			textAlign: 'center',
+			color: 'rgba(255, 255, 255, 0.3)',
+			textShadow: '-1px -1px rgba(0, 0, 0, 0.2)'
+		})
+	};
+
+	return compose(_Composite, function() {
 		// model
 		var todoStore = new Model();
 		// list todos sorted by creation timestamp, oldest first
@@ -103,26 +116,34 @@ define([
 			return todo.done;
 		});
 
-		var title = new Label("todos");
-		title.style(new JSS({
-			display: 'block',
-			fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-			fontSize: '70px',
-			fontWeight: 'bold',
-			textAlign: 'center',
-			color: 'rgba(255, 255, 255, 0.3)',
-			textShadow: '-1px -1px rgba(0, 0, 0, 0.2)'
-		}));
+		// Layout
+		this._setRoot(new VFlex().content([
+			new Label("todos").style(style.title),
+			new HFlex().content([
+				new Checkbox(new CheckAllAccessor(todoStore)),
+				this._own(new ShortTextInput({
+					placeholder: "What needs to be done?"
+				}), 'todoInput'),
+			]),
+			this._own(compose.create(ItemList, {
+				_itemFactory: function(todo) {
+					return new Todo(todo);
+				}
+			}), 'list'),
+			new HFlex().content([
+				new ActiveTodoCounter(activeTodos.count()),
+				this._own(new Button("All"), 'filterAllBtn'),
+				this._own(new Button("Active"), 'filterActiveBtn'),
+				this._own(new Button("Completed"), 'filterCompletedBtn'),
+				this._own(new ClearCompletedButton(completedTodos.count()), 'clearCompletedBtn'),
+			])
+		]));
 
-		var list = compose.create(ItemList, {
-			_itemFactory: function(todo) {
-				return new Todo(todo);
-			}
-		});
+		// add here all listeners for events coming from subcomponents
+		// we might have chained them with .chain() method, but with many components, it can become illegible.
 
-		var todoInput = new ShortTextInput({
-			placeholder: "What needs to be done?"
-		});
+		// add a todo "on input" from text box
+		var todoInput = this._owned.todoInput;
 		todoInput.onInput(function(label) {
 			todoStore.add({
 				label: label,
@@ -132,9 +153,21 @@ define([
 			todoInput.value(null);
 		});
 
-		var activeCounter = new ActiveTodoCounter(activeTodos.count());
-		var clearCompletedBtn = new ClearCompletedButton(completedTodos.count());
-		clearCompletedBtn.onAction(function() {
+		// swap list content with matching todo stores
+		var list = this._owned.list;
+		this._owned.filterAllBtn.onAction(function() {
+			list.content(sortStore(todoStore));
+		});
+		this._owned.filterActiveBtn.onAction(function() {
+			list.content(sortStore(activeTodos));
+		});
+		this._owned.filterCompletedBtn.onAction(function() {
+			list.content(sortStore(completedTodos));
+		});
+
+		// bulk remove completed todos
+		// TODO: cleaner API
+		this._owned.clearCompletedBtn.onAction(function() {
 			var changeArg = {};
 			Object.keys(completedTodos._getValue()).forEach(function(key) {
 				changeArg[key] = { remove: true };
@@ -142,41 +175,8 @@ define([
 			todoStore._change(changeArg);
 		});
 
-		// Filters
 
-		var filterAllBtn = new Button("All");
-		filterAllBtn.onAction(function() {
-			list.content(sortStore(todoStore));
-		});
-
-		var filterActiveBtn = new Button("Active");
-		filterActiveBtn.onAction(function() {
-			list.content(sortStore(activeTodos));
-		});
-
-		var filterCompletedBtn = new Button("Completed");
-		filterCompletedBtn.onAction(function() {
-			list.content(sortStore(completedTodos));
-		});
-
-		// check-all
-		var checkAll = new Checkbox(new CheckAllAccessor(todoStore));
-
-		// Layout
-		this._root.content([
-			title,
-			checkAll,
-			todoInput,
-			list,
-			activeCounter,
-			filterAllBtn,
-			filterActiveBtn,
-			filterCompletedBtn,
-			clearCompletedBtn
-		]);
-
-
-		// Données test
+		// test data
 		todoStore.add({
 			label: "My second task",
 			done: false,
@@ -188,6 +188,6 @@ define([
 			creation: new Date(1)
 		});
 
-		list.content(sortedStore);
+		this._owned.list.content(sortedStore);
 	});
 });

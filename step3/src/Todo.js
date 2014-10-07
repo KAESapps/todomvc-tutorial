@@ -1,32 +1,28 @@
 define([
-	'compose',
+	'ksf/utils/compose',
 	'ksf/dom/composite/_Composite',
-	'ksf-ui/layout/Flow',
+	'ksf-ui/layout/HFlex',
 	'ksf-ui/widget/Label',
 	'ksf-ui/widget/base/Button',
 	'ksf-ui/widget/input/ShortText',
 	'ksf-ui/widget/editable/Checkbox',
-	'ksf/dom/style/JSS',
-	'ksf/dom/style/_Stylable',
 ], function(
 	compose,
 	_Composite,
-	Flow,
+	HFlex,
 	Label,
 	Button,
 	ShortText,
-	Checkbox,
-	JSS,
-	_Stylable
+	Checkbox
 ){
-	var EditableLabel = compose(_Composite, _Stylable, {
+	var EditableLabel = compose(_Composite, {
 		_rootFactory: function() {
-			return new Flow();
+			return new HFlex();
 		}
 	}, function(rValue) {
 		this._rValue = rValue;
-		this._label = new Label(rValue);
-		this._editor = new ShortText();
+		this._own(new Label(rValue), 'label');
+		this._own(new ShortText(), 'editor');
 		
 		var self = this;
 		this.domNode.ondblclick = function() {
@@ -44,21 +40,21 @@ define([
 	}, {
 		_readonly: function() {
 			this._cancelBlurListener && this._cancelBlurListener();
-			this._root.content([this._label]);
+			this._root.content([this._owned.label]);
 		},
 
 		_edit: function() {
-			this._editor.value(this._rValue.value());
-			this._root.content([this._editor]);
-			this._editor.focus();
+			this._owned.editor.value(this._rValue.value());
+			this._root.content([this._owned.editor]);
+			this._owned.editor.focus();
 			var self = this;
-			this._cancelBlurListener = this._editor.onBlur(function() {
+			this._cancelBlurListener = this._owned.editor.onBlur(function() {
 				self._confirm();
 			});
 		},
 
 		_confirm: function() {
-			this._rValue.value(this._editor.value());
+			this._rValue.value(this._owned.editor.value());
 			this._readonly();
 		},
 
@@ -67,27 +63,13 @@ define([
 		}
 	});
 
-	return compose(_Composite, {
-		_rootFactory: function() {
-			return new Flow();			
-		}
-	}, function(todo) {
-		var self = this;
-		var label = this._label = new EditableLabel(todo.prop('label'));
-		label.style(new JSS({
-			display: 'inline-block',
-		}));
-		
-		var checkbox = new Checkbox(todo.prop('done'));
-		var deleteBtn = new Button("X");
-		deleteBtn.onAction(function() {
-			todo.delete();
-		});
-
-		this._root.content([
-			checkbox,
-			label,
-			deleteBtn
-		]);
+	return compose(_Composite, function(todo) {
+		this._setRoot(new HFlex().content([
+			new Checkbox(todo.prop('done')),
+			new EditableLabel(todo.prop('label')),
+			new Button("X").chain('onAction', function() {
+				todo.delete();
+			})
+		]));
 	});
 });

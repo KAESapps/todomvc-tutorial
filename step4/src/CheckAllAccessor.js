@@ -1,5 +1,5 @@
 define([
-	'compose'
+	'ksf/utils/compose'
 ], function(
 	compose
 ){
