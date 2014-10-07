@@ -1,9 +1,5 @@
 # Etape 1 : amorçage du projet
 
-Installer les dépendances :
-
-    bower install
-
 ## src/App.js
 
 App.js représente notre composant de plus haut niveau, autrement dit "l'application", qui est un composant composé de sous-composants, ce que nous appelons un "composite".
