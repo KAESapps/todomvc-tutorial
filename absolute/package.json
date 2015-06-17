@@ -1,0 +1,21 @@
+{
+	"name": "ksf-todomvc-tutorial-step4",
+	"version": "0.0.0",
+	"description": "",
+	"dependencies": {
+		"ksf": "KAESapps/ksf#master",
+		"absolute": "KAESapps/absolute#master"
+	},
+	"scripts": {
+		"build": "browserify src/boot.js -o build/app.js"
+	},
+	"devDependencies": {
+		"brfs": "latest",
+		"browserify": "latest"
+	},
+	"browserify": {
+		"transform": [
+			"brfs"
+		]
+	}
+}
