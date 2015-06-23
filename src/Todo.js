@@ -1,6 +1,7 @@
 var compose = require('ksf/utils/compose');
 var _ContentDelegate = require('absolute/_ContentDelegate');
 var Label = require('absolute/Label');
+var Button = require('absolute/Button');
 var Background = require('absolute/Background');
 var HFlex = require('absolute/HFlex');
 var Align = require('absolute/Align');
@@ -19,6 +20,14 @@ module.exports = compose(_ContentDelegate, function(todoNode) {
 			this._dataNode.change('done', !this._checkbox.checked());
 		}.bind(this)), 'middle', 'middle').width(50), 'fixed'],
 		this._labelArea = new Switch(),
+		[this._deleteBtn = new Button().value('×').color('transparent').textStyle({
+			color: '#cc9a9a',
+			font: {
+				family: uiVars.font,
+				size: '20px',
+				weight: 'bold'
+			}
+		}).width(50), 'fixed'],
 	])).color('white').height(50);
 
 	this._readOnlyLabel = new Mousable(new Margin(this._label = new Label().font({ family: uiVars.font, size: '24px' }), { left: 10 })).on('dblclick', function() {
@@ -69,6 +78,10 @@ module.exports = compose(_ContentDelegate, function(todoNode) {
 		this._checkbox.checked(checked);
 		this._label.color(checked ? '#d9d9d9' : 'black');
 		this._label.textDecoration(checked ? 'line-through' : 'none');
+		return this;
+	},
+	onDelete: function(cb) {
+		this._deleteBtn.onAction(cb);
 		return this;
 	}
 });

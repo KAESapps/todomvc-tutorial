@@ -12,16 +12,21 @@ var MappedValue = require('ksf/observable/MappedValue');
 var OrderedList = require('absolute/deep/OrderedBranch');
 var nativeCompare = require('ksf/utils/nativeCompare');
 var _Evented = require('ksf/base/_Evented');
+var uiVars = require('./uiVars');
 
-var LeftTodosCounter = compose(_Evented, function(todoTree) {
+var countLeftTodos = function(todoTree) {
 	var treeValue = todoTree.value();
-	this._value = Object.keys(todoTree.keys()).filter(function(key) {
+	return Object.keys(todoTree.keys()).filter(function(key) {
 		return !treeValue[key + '/done'];
 	}).length;
+};
+
+var LeftTodosCounter = compose(_Evented, function(todoTree) {
+	this._value = countLeftTodos(todoTree);
 
 	todoTree.onChange(function(change) {
 		if (change.key.split('/')[1] === 'done') {
-			this._value += change.value ? -1 : 1;
+			this._value = countLeftTodos(todoTree);
 			this._emit('change', this._value);
 		}
 	}.bind(this));
@@ -41,25 +46,16 @@ module.exports = compose(_ContentDelegate, function(todoStore) {
 	var leftTodosCounter = new LeftTodosCounter(todos);
 
 	this._content = new VPile().content([
+		new Label().value("todos").hAlign('center').color('rgba(175, 47, 47, 0.15)').font({
+			family: uiVars.font,
+			size: '90px'
+		}).height(100),
 		this._input = new InputHeader(todos, leftTodosCounter).onInput(function(label) {
-			var key = todoStore.addKey();
-			todoStore.change(key + '/label', label);
-			todoStore.change(key + '/created', Date.now());
+			var key = todos.addKey();
+			todos.change(key + '/label', label);
+			todos.change(key + '/created', Date.now());
 			this._input.clear();
 		}.bind(this)),
-		new OrderedList({
-			content: new VPile(),
-			value: sortedTodos,
-			onKeyAdded: function(pile, key, beforeKey) {
-				pile.add(key, new Todo(new DeepBranch(sortedTodos, key)), beforeKey);
-			},
-			onKeyMoved: function(pile, key, beforeKey) {
-				pile.move(key, beforeKey);
-			},
-			onKeyRemoved: function(pile, key) {
-				pile.remove(key);
-			}
-		}),
 		new HFlex([
 			new Reactive({
 				value: new MappedValue(leftTodosCounter, function(count) {
@@ -69,8 +65,23 @@ module.exports = compose(_ContentDelegate, function(todoStore) {
 						return count + " items left";
 					}
 				}),
-				content: new Label()
+				content: new Label().font({ family: uiVars.font }).color('gray').hAlign('right')
 			})
-		])
+		]).height(20),
+		new OrderedList({
+			content: new VPile(),
+			value: sortedTodos,
+			onKeyAdded: function(pile, key, beforeKey) {
+				pile.add(key, new Todo(new DeepBranch(sortedTodos, key)).onDelete(function() {
+					todos.removeKey(key);
+				}), beforeKey);
+			},
+			onKeyMoved: function(pile, key, beforeKey) {
+				pile.move(key, beforeKey);
+			},
+			onKeyRemoved: function(pile, key) {
+				pile.remove(key);
+			}
+		}),
 	]);
 });
